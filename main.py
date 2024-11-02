@@ -134,7 +134,7 @@ def run(proxy):
         def add_cookies_to_driver(driver):
             cookies = [
             {
-                "domain": ".nodepay.ai",
+                "domain": "app.nodepay.ai",
                 "expirationDate": 1765142193.420515,
                 "hostOnly": False,
                 "httpOnly": False,
@@ -147,7 +147,7 @@ def run(proxy):
                 "value": "GA1.1.549148054.1730376988"
             },
             {
-                "domain": ".nodepay.ai",
+                "domain": "app.nodepay.ai",
                 "expirationDate": 1764937072.190398,
                 "hostOnly": False,
                 "httpOnly": False,
@@ -160,7 +160,7 @@ def run(proxy):
                 "value": "GS1.1.1730376987.1.1.1730377072.0.0.0"
             },
             {
-                "domain": ".nodepay.ai",
+                "domain": "app.nodepay.ai",
                 "expirationDate": 1765142193.444935,
                 "hostOnly": False,
                 "httpOnly": False,
