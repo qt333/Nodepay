@@ -111,6 +111,8 @@ def run(proxy):
         chrome_options.add_extension(f'./{extension_id}.crx')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--headless=new')
+        chrome_options.add_argument('--disable-web-security')
+        chrome_options.add_argument('--allow-file-access-from-files')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0")
         chrome_options.add_argument(f"--proxy-server={proxy}")
