@@ -133,46 +133,72 @@ def run(proxy):
         #add specific cookie for auth
         def add_cookies_to_driver(driver):
             cookies = [
-            {
-                "domain": "app.nodepay.ai",
-                "expirationDate": 1765142193.420515,
-                "hostOnly": False,
-                "httpOnly": False,
-                "name": "_ga",
-                "path": "/",
-                "sameSite": "unspecified",
-                "secure": False,
-                "session": False,
-                "storeId": "0",
-                "value": "GA1.1.549148054.1730376988"
-            },
-            {
-                "domain": "app.nodepay.ai",
-                "expirationDate": 1764937072.190398,
-                "hostOnly": False,
-                "httpOnly": False,
-                "name": "_ga_KYCRH36S70",
-                "path": "/",
-                "sameSite": "unspecified",
-                "secure": False,
-                "session": False,
-                "storeId": "0",
-                "value": "GS1.1.1730376987.1.1.1730377072.0.0.0"
-            },
-            {
-                "domain": "app.nodepay.ai",
-                "expirationDate": 1765142193.444935,
-                "hostOnly": False,
-                "httpOnly": False,
-                "name": "_ga_DDBLPW88G4",
-                "path": "/",
-                "sameSite": "unspecified",
-                "secure": False,
-                "session": False,
-                "storeId": "0",
-                "value": "GS1.1.1730582174.7.1.1730582193.0.0.0"
-            }
-            ]
+        {
+            "domain": ".nodepay.ai",
+            "expirationDate": 1765143375.493227,
+            "hostOnly": False,
+            "httpOnly": False,
+            "name": "_ga",
+            "path": "/",
+            "sameSite": "unspecified",
+            "secure": False,
+            "session": False,
+            "storeId": "0",
+            "value": "GA1.1.549148054.1730376988"
+        },
+        {
+            "domain": ".nodepay.ai",
+            "expirationDate": 1764937072.190398,
+            "hostOnly": False,
+            "httpOnly": False,
+            "name": "_ga_KYCRH36S70",
+            "path": "/",
+            "sameSite": "unspecified",
+            "secure": False,
+            "session": False,
+            "storeId": "0",
+            "value": "GS1.1.1730376987.1.1.1730377072.0.0.0"
+        },
+        {
+            "domain": ".nodepay.ai",
+            "expirationDate": 1765143375.519672,
+            "hostOnly": False,
+            "httpOnly": False,
+            "name": "_ga_DDBLPW88G4",
+            "path": "/",
+            "sameSite": "unspecified",
+            "secure": False,
+            "session": False,
+            "storeId": "0",
+            "value": "GS1.1.1730582174.7.1.1730583375.0.0.0"
+        },
+        {
+            "domain": ".nodepay.ai",
+            "expirationDate": 1765143375.519672,
+            "hostOnly": False,
+            "httpOnly": False,
+            "name": "__cf_bm",
+            "path": "/",
+            "sameSite": "unspecified",
+            "secure": False,
+            "session": False,
+            "storeId": "0",
+            "value": "q12cylkxIwkoHIwgGb7SOb19I3Fdtegk.OTbJAPxfaA-1730582193-1.0.1.1-aQgyenFteOm8BDN0lrNRRfm8cuT3cYVl4AohVBraDY5TIrU_NofOyeMqWf3hfGLHTUln3rmISnurkw.wLDbqUw"
+        },
+        {
+            "domain": "api.nodepay.org",
+            "expirationDate": 1765143375.519672,
+            "hostOnly": False,
+            "httpOnly": False,
+            "name": "JSESSIONID",
+            "path": "/",
+            "sameSite": "unspecified",
+            "secure": False,
+            "session": False,
+            "storeId": "0",
+            "value": "55BA1B9557A8173B99A319C9145DAFB4"
+        }
+        ]
             
             for cookie in cookies:
                 driver.add_cookie(cookie)
