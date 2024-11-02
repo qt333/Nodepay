@@ -137,7 +137,15 @@ def run(proxy):
         
         # driver.save_screenshot('screenshot.png')
 
-        add_cookie_to_local_storage(driver, cookie)
+        # add_cookie_to_local_storage(driver, cookie)
+
+        #add specific cookie for auth
+        cookie = {
+            "np_webapp_token": cookie,
+            "np_token": cookie
+        }
+
+        driver.add_cookie(cookie)
 
         # Check successful login
         while not wait_for_element_exists(driver, By.XPATH, "//*[text()='Dashboard']"):
