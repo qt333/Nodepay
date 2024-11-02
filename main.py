@@ -140,12 +140,17 @@ def run(proxy):
         # add_cookie_to_local_storage(driver, cookie)
 
         #add specific cookie for auth
-        cookie = {
-            "np_webapp_token": cookie,
-            "np_token": cookie
-        }
+        def add_cookies_to_driver(driver, cookie_value):
+            cookies = [
+            {"name": "np_webapp_token", "value": cookie_value},
+            {"name": "np_token", "value": cookie_value}]
+    
+            for cookie in cookies:
+                driver.add_cookie(cookie)
+            logging.info(f"Added cookie: {cookie['name']} with value {cookie['value'][:8]}...{cookie['value'][-8:]}")
+            logging.info("!!!!! Your tokens can be used to login for 7 days !!!!!")
 
-        driver.add_cookie(cookie)
+        add_cookies_to_driver(driver, cookie)
 
         # Check successful login
         while not wait_for_element_exists(driver, By.XPATH, "//*[text()='Dashboard']"):
