@@ -48,14 +48,14 @@ def wait_for_element(driver, by, value, timeout=30):
 
 def set_local_storage_item(driver, key, value):
     driver.execute_script(f"localStorage.setItem('{key}', '{value}');")
-    result = driver.execute_script(f"return localStorage.getItem('{key}');")
-    return result
+    # result = driver.execute_script(f"return localStorage.getItem('{key}');")
+    # return result
 
 def add_cookie_to_local_storage(driver, cookie_value):
     keys = ['np_webapp_token', 'np_token']
     for key in keys:
         result = set_local_storage_item(driver, key, cookie_value)
-        logging.info(f"Added {key} with value {result[:8]}...{result[-8:]} to local storage.")
+        # logging.info(f"Added {key} with value {result[:8]}...{result[-8:]} to local storage.")
     logging.info("!!!!! Your token can be used to login for 7 days !!!!!")
 
 def get_chromedriver_version():
@@ -110,7 +110,7 @@ def run(proxy):
         chrome_options = Options()
         chrome_options.add_extension(f'./{extension_id}.crx')
         chrome_options.add_argument('--no-sandbox')
-        # chrome_options.add_argument('--headless=new')
+        chrome_options.add_argument('--headless=new')
         chrome_options.add_argument('--disable-web-security')
         chrome_options.add_argument('--allow-file-access-from-files')
         chrome_options.add_argument('--disable-dev-shm-usage')
@@ -135,7 +135,7 @@ def run(proxy):
         driver.get(extension_url)
         time.sleep(random.randint(13,14))
         
-        driver.save_screenshot('screenshot.png')
+        # driver.save_screenshot('screenshot.png')
 
         add_cookie_to_local_storage(driver, cookie)
 
