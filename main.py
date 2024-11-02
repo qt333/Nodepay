@@ -110,7 +110,7 @@ def run(proxy):
         chrome_options = Options()
         chrome_options.add_extension(f'./{extension_id}.crx')
         chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless=new')
+        # chrome_options.add_argument('--headless=new')
         chrome_options.add_argument('--disable-web-security')
         chrome_options.add_argument('--allow-file-access-from-files')
         chrome_options.add_argument('--disable-dev-shm-usage')
@@ -134,6 +134,8 @@ def run(proxy):
         logging.info(f'Navigating to {extension_url} website...')
         driver.get(extension_url)
         time.sleep(random.randint(13,14))
+        
+        driver.save_screenshot('screenshot.png')
 
         add_cookie_to_local_storage(driver, cookie)
 
