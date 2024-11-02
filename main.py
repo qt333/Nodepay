@@ -133,8 +133,8 @@ def run(proxy):
         #add specific cookie for auth
         def add_cookies_to_driver(driver, cookie_value):
             cookies = [
+            {"domain": "api.nodepay.org", "path": "/"},
             {"name": "np_webapp_token", "value": cookie_value},
-            {"domain": "app.nodepay.ai", "path": "/"},
             {"name": "np_token", "value": cookie_value}]
     
             for cookie in cookies:
