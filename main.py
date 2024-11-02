@@ -130,15 +130,6 @@ def run(proxy):
         # NodePass checks for width less than 1024p
         driver.set_window_size(1024, driver.get_window_size()['height'])
 
-        # Navigate to a webpage
-        logging.info(f'Navigating to {extension_url} website...')
-        driver.get(extension_url)
-        time.sleep(random.randint(13,14))
-        
-        # driver.save_screenshot('screenshot.png')
-
-        # add_cookie_to_local_storage(driver, cookie)
-
         #add specific cookie for auth
         def add_cookies_to_driver(driver, cookie_value):
             cookies = [
@@ -151,6 +142,16 @@ def run(proxy):
             logging.info("!!!!! Your tokens can be used to login for 7 days !!!!!")
 
         add_cookies_to_driver(driver, cookie)
+        # Navigate to a webpage
+        logging.info(f'Navigating to {extension_url} website...')
+        driver.get(extension_url)
+        time.sleep(random.randint(5,8))
+        
+        # driver.save_screenshot('screenshot.png')
+
+        # add_cookie_to_local_storage(driver, cookie)
+
+        
 
         # Check successful login
         while not wait_for_element_exists(driver, By.XPATH, "//*[text()='Dashboard']"):
