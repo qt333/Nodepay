@@ -179,11 +179,11 @@ def run(proxy):
             logging.info(f"Added cookie: {cookie['name']} with value {cookie['value'][:8]}...{cookie['value'][-8:]}")
             logging.info("!!!!! Your tokens can be used to login for 7 days !!!!!")
 
-        add_cookies_to_driver(driver)
         # Navigate to a webpage
         logging.info(f'Navigating to {extension_url} website...')
         driver.get(extension_url)
         time.sleep(random.randint(5,8))
+        add_cookies_to_driver(driver)
         
         # driver.save_screenshot('screenshot.png')
 
