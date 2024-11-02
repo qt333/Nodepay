@@ -131,20 +131,46 @@ def run(proxy):
         driver.set_window_size(1024, driver.get_window_size()['height'])
 
         #add specific cookie for auth
-        def add_cookies_to_driver(driver, cookie_value):
-            domain = extension_url
+        def add_cookies_to_driver(driver):
             cookies = [
             {
-                "name": "np_webapp_token",
-                "value": cookie_value,
-                "domain": domain,
-                "path": "/"
+                "domain": ".nodepay.ai",
+                "expirationDate": 1765142193.420515,
+                "hostOnly": False,
+                "httpOnly": False,
+                "name": "_ga",
+                "path": "/",
+                "sameSite": "unspecified",
+                "secure": False,
+                "session": False,
+                "storeId": "0",
+                "value": "GA1.1.549148054.1730376988"
             },
             {
-                "name": "np_token",
-                "value": cookie_value,
-                "domain": domain,
-                "path": "/"
+                "domain": ".nodepay.ai",
+                "expirationDate": 1764937072.190398,
+                "hostOnly": False,
+                "httpOnly": False,
+                "name": "_ga_KYCRH36S70",
+                "path": "/",
+                "sameSite": "unspecified",
+                "secure": False,
+                "session": False,
+                "storeId": "0",
+                "value": "GS1.1.1730376987.1.1.1730377072.0.0.0"
+            },
+            {
+                "domain": ".nodepay.ai",
+                "expirationDate": 1765142193.444935,
+                "hostOnly": False,
+                "httpOnly": False,
+                "name": "_ga_DDBLPW88G4",
+                "path": "/",
+                "sameSite": "unspecified",
+                "secure": False,
+                "session": False,
+                "storeId": "0",
+                "value": "GS1.1.1730582174.7.1.1730582193.0.0.0"
             }
             ]
             
@@ -153,7 +179,7 @@ def run(proxy):
             logging.info(f"Added cookie: {cookie['name']} with value {cookie['value'][:8]}...{cookie['value'][-8:]}")
             logging.info("!!!!! Your tokens can be used to login for 7 days !!!!!")
 
-        add_cookies_to_driver(driver, cookie)
+        add_cookies_to_driver(driver)
         # Navigate to a webpage
         logging.info(f'Navigating to {extension_url} website...')
         driver.get(extension_url)
