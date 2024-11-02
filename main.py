@@ -31,14 +31,14 @@ def check_active_element(driver):
     except NoSuchElementException:
         logging.error("Failed to find 'Activated' element. Extension activation failed.")
 
-def wait_for_element_exists(driver, by, value, timeout=10):
+def wait_for_element_exists(driver, by, value, timeout=30):
     try:
         WebDriverWait(driver, timeout).until(EC.presence_of_element_located((by, value)))
         return True
     except TimeoutException:
         return False
 
-def wait_for_element(driver, by, value, timeout=10):
+def wait_for_element(driver, by, value, timeout=30):
     try:
         element = WebDriverWait(driver, timeout).until(EC.presence_of_element_located((by, value)))
         return element
@@ -83,17 +83,17 @@ def get_os_info():
         logging.error(f"Could not get OS information: {e}")
         return "Unknown OS"
 
-def run():
+def run(proxy):
     setup_logging()
     
     branch = ''
     version = '1.0.9' + branch
-    secUntilRestart = 60
+    secUntilRestart = 30
     logging.info(f"Started the script {version}")
 
     try:
-        os_info = get_os_info()
-        logging.info(f'OS Info: {os_info}')
+        # os_info = get_os_info()
+        # logging.info(f'OS Info: {os_info}')
         
         # Read variables from the OS env
         cookie = os.getenv('NP_COOKIE')
@@ -105,13 +105,15 @@ def run():
             logging.error('No cookie provided. Please set the NP_COOKIE environment variable.')
             return  # Exit the script if credentials are not provided
 
+        
+
         chrome_options = Options()
         chrome_options.add_extension(f'./{extension_id}.crx')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--headless=new')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0")
-
+        chrome_options.add_argument(f"--proxy-server={proxy}")
         # Initialize the WebDriver
         chromedriver_version = get_chromedriver_version()
         logging.info(f'Using {chromedriver_version}')
@@ -129,7 +131,7 @@ def run():
         # Navigate to a webpage
         logging.info(f'Navigating to {extension_url} website...')
         driver.get(extension_url)
-        time.sleep(random.randint(3,7))
+        time.sleep(random.randint(13,14))
 
         add_cookie_to_local_storage(driver, cookie)
 
@@ -140,7 +142,7 @@ def run():
 
         logging.info('Logged in successfully!')
 
-        time.sleep(random.randint(10,50))
+        time.sleep(random.randint(10,15))
         logging.info('Accessing extension settings page...')
         driver.get(f'chrome-extension://{extension_id}/index.html')
         time.sleep(random.randint(3,7))
@@ -190,4 +192,13 @@ def run():
             driver.quit()
             break
 
-run()
+# proxy_list = []
+with open('free-proxy.txt', 'r') as file:
+    proxy_list = [proxy.strip() for proxy in file.readlines()]
+    # print(proxy_list)
+
+from concurrent.futures import ThreadPoolExecutor
+# run()
+
+with ThreadPoolExecutor(max_workers=len(proxy_list)) as pool:
+    pool.map(run, proxy_list)    

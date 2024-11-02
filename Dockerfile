@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM debian:11-slim
 
 # Set environment variables
 ENV EXTENSION_ID=lgmpfmgeabnnlemejacfljbmonaomfmm
@@ -6,33 +6,39 @@ ENV EXTENSION_URL='https://app.nodepay.ai/'
 ENV GIT_USERNAME=warren-bank
 ENV GIT_REPO=chrome-extension-downloader
 
-# Install necessary packages and clean up to reduce image size
-RUN apt-get update && \
-    apt-get install -qqy --no-install-recommends \
+# Install necessary packages then clean up to reduce image size
+RUN apt update && \
+    apt upgrade -y && \
+    apt install -qqy \
     curl \
     wget \
     git \
     chromium \
     chromium-driver \
+    python3 \
     python3-pip \
     python3-requests \
     python3-selenium \
-    coreutils && \
-    apt-get clean && \
+    coreutils \
+    bash && \
+    apt autoremove --purge -y && \
+    apt clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Download crx downloader from git
-RUN git clone --depth 1 "https://github.com/${GIT_USERNAME}/${GIT_REPO}.git" && \
+RUN git clone "https://github.com/${GIT_USERNAME}/${GIT_REPO}.git" && \
     chmod +x ./${GIT_REPO}/bin/*
 
 # Download the extension selected
 RUN ./${GIT_REPO}/bin/crxdl $EXTENSION_ID
 
-# Install only required Python packages
-RUN pip install --no-cache-dir selenium requests
+# Install Python packages
+RUN pip3 install distro
 
 # Copy the Python script
 COPY main.py .
+# Copy the Python script
+COPY free-proxy.txt .
 
 # Run the Python script
-ENTRYPOINT [ "python", "main.py" ]
+ENTRYPOINT [ "python3", "main.py" ]
