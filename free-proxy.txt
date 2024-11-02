@@ -1,2 +1,2 @@
-socks5://47.91.121.127:9080
-socks5://47.91.109.17:8108 
+us.mooproxy.xyz:55688:Deuce88:3TbIinNEF2_country-de_session-D8Tgm1O3
+us.mooproxy.xyz:55688:Deuce88:3TbIinNEF2_country-de_session-who5xV9O

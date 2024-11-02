@@ -192,13 +192,20 @@ def run(proxy):
             driver.quit()
             break
 
-# proxy_list = []
+
 with open('free-proxy.txt', 'r') as file:
     proxy_list = [proxy.strip() for proxy in file.readlines()]
     # print(proxy_list)
 
+def define_proxy(proxy):
+    host, port, username, password = proxy.split(':')
+    proxy_url = f'socks5://{username}:{password}@{host}:{port}'
+    return proxy_url
+
+proxies = [define_proxy(proxy) for proxy in proxy_list]
+
 from concurrent.futures import ThreadPoolExecutor
 # run()
 
-with ThreadPoolExecutor(max_workers=len(proxy_list)) as pool:
-    pool.map(run, proxy_list)    
+with ThreadPoolExecutor(max_workers=len(proxies)) as pool:
+    pool.map(run, proxies)    
