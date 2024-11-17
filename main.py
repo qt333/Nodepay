@@ -236,15 +236,15 @@ with open("proxies.txt", "r") as file:
     # print(proxy_list)
 
 
-def define_proxy(proxy):
-    host, port, username, password = proxy.split(":")
-    proxy_url = f"http://{username}:{password}@{host}:{port}"
-    return proxy
+# def define_proxy(proxy):
+    # host, port, username, password = proxy.split(":")
+    # proxy_url = f"http://{username}:{password}@{host}:{port}"
+    # return proxy
 
 
-proxies = [define_proxy(proxy) for proxy in proxy_list]
+# proxies = [define_proxy(proxy) for proxy in proxy_list]
 
 from concurrent.futures import ThreadPoolExecutor
 
-with ThreadPoolExecutor(max_workers=len(proxies)) as pool:
-    pool.map(run, proxies)
+with ThreadPoolExecutor(max_workers=len(proxy_list)) as pool:
+    pool.map(run, proxy_list)
