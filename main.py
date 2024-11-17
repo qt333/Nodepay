@@ -39,7 +39,7 @@ def check_active_element(driver):
         )
 
 
-def wait_for_element_exists(driver, by, value, timeout=10):
+def wait_for_element_exists(driver, by, value, timeout=60):
     try:
         WebDriverWait(driver, timeout).until(
             EC.presence_of_element_located((by, value))
@@ -103,6 +103,34 @@ def get_os_info():
         logging.error(f"Could not get OS information: {e}")
         return "Unknown OS"
 
+def intercept(request):
+    # print(f"Captured request [intercept]: {request.url}")
+    # Check if the URL contains 'googleapis.com' and block those requests
+    if 'googleapis.com' in request.url or 'update.googleapis.com' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Abort the request
+    # Check if the URL matches the Google API and block it
+    if 'optimizationguide-pa.googleapis.com' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
+    if 'svg' in request.url or 'jpg' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
+    if 'gravatar.com' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
+    if 'googletagmanager.com' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
+    if 'google-analytics.com' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
+    if 'content-autofill.googleapis.com' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
+    if '/static/media/' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
 
 def run(proxy):
     setup_logging()
@@ -145,8 +173,15 @@ def run(proxy):
                     "http": proxy,
                     "https": proxy,
                     "no_proxy": "localhost,127.0.0.1",  # Disable proxy for localhost
+                },
+                'exclude_host':[
+                    'googleapis.com',
+                    'optimizationguide-pa.googleapis.com',
+                    'gravatar.com',
+                    'google-analytics.com',
+                    'googletagmanager.com'
+                    ]
                 }
-            }
 
         # Initialize the WebDriver
         # chromedriver_version = get_chromedriver_version()
@@ -161,6 +196,7 @@ def run(proxy):
         run(proxy)
 
     try:
+        driver.request_interceptor = intercept
         # NodePass checks for width less than 1024p
         driver.set_window_size(1024, driver.get_window_size()["height"])
 
@@ -180,7 +216,7 @@ def run(proxy):
 
         logging.info("Logged in successfully!")
 
-        time.sleep(random.randint(10, 50))
+        time.sleep(random.randint(6, 15))
         logging.info("Accessing extension settings page...")
         driver.get(f"chrome-extension://{extension_id}/index.html")
         time.sleep(random.randint(3, 7))
@@ -222,7 +258,7 @@ def run(proxy):
 
     while True:
         try:
-            time.sleep(3600)
+            time.sleep(86400)
             driver.refresh()
             connection_status(driver)
         except KeyboardInterrupt:
