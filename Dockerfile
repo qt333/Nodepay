@@ -13,6 +13,7 @@ RUN apt update && \
     curl \
     wget \
     git \
+    openssl \
     chromium \
     chromium-driver \
     python3 \
@@ -33,7 +34,7 @@ RUN git clone "https://github.com/${GIT_USERNAME}/${GIT_REPO}.git" && \
 RUN ./${GIT_REPO}/bin/crxdl $EXTENSION_ID
 
 # Install Python packages
-RUN pip3 install distro selenium-wire
+RUN pip3 install distro && pip3 install selenium-wire && pip3 install blinker==1.7.0
 
 # Copy the Python script
 COPY main.py .
