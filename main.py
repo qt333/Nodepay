@@ -76,15 +76,15 @@ def add_cookie_to_local_storage(driver, cookie_value):
     logging.info("!!!!! Your token can be used to login for 7 days !!!!!")
 
 
-def get_chromedriver_version():
-    try:
-        result = subprocess.run(
-            ["chromedriver", "--version"], capture_output=True, text=True
-        )
-        return result.stdout.strip()
-    except Exception as e:
-        logging.error(f"Could not get ChromeDriver version: {e}")
-        return "Unknown version"
+# def get_chromedriver_version():
+#     try:
+#         result = subprocess.run(
+#             ["chromedriver", "--version"], capture_output=True, text=True
+#         )
+#         return result.stdout.strip()
+#     except Exception as e:
+#         logging.error(f"Could not get ChromeDriver version: {e}")
+#         return "Unknown version"
 
 
 def get_os_info():
@@ -149,8 +149,8 @@ def run(proxy):
             }
 
         # Initialize the WebDriver
-        chromedriver_version = get_chromedriver_version()
-        logging.info(f"Using {chromedriver_version}")
+        # chromedriver_version = get_chromedriver_version()
+        # logging.info(f"Using {chromedriver_version}")
         driver = webdriver.Chrome(
             options=chrome_options, seleniumwire_options=seleniumwire_options
         )
