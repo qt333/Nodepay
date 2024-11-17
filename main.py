@@ -9,6 +9,7 @@ from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -155,6 +156,13 @@ def run(proxy):
                 "No cookie provided. Please set the NP_COOKIE environment variable."
             )
             return  # Exit the script if credentials are not provided
+        
+        # Check the operating system
+        if platform.system() == "Linux":
+            chromedriver_path = "/usr/bin/chromedriver"
+            service = Service(chromedriver_path)
+        else:
+            service = None  # On Windows or other OS, no need to set chromedriver path
 
         chrome_options = Options()
         chrome_options.add_extension(f"./{extension_id}.crx")
@@ -178,17 +186,26 @@ def run(proxy):
                     'googleapis.com',
                     'optimizationguide-pa.googleapis.com',
                     'gravatar.com',
+                    'googletagmanager.com',
                     'google-analytics.com',
-                    'googletagmanager.com'
+                    'update.googleapis.com',
+                    'content-autofill.googleapis.com'
                     ]
                 }
 
         # Initialize the WebDriver
         # chromedriver_version = get_chromedriver_version()
         # logging.info(f"Using {chromedriver_version}")
-        driver = webdriver.Chrome(
+
+        if service:
+            driver = webdriver.Chrome(service=service,
             options=chrome_options, seleniumwire_options=seleniumwire_options
         )
+        else:
+            driver = webdriver.Chrome(
+            options=chrome_options, seleniumwire_options=seleniumwire_options
+        )
+        
     except Exception as e:
         logging.error(f"An error occurred: {e}")
         logging.error(f"Restarting in 60 seconds...")
