@@ -40,7 +40,7 @@ def check_active_element(driver):
         )
 
 
-def wait_for_element_exists(driver, by, value, timeout=60):
+def wait_for_element_exists(driver, by, value, timeout=30):
     try:
         WebDriverWait(driver, timeout).until(
             EC.presence_of_element_located((by, value))
@@ -114,9 +114,9 @@ def intercept(request):
     if 'optimizationguide-pa.googleapis.com' in request.url:
         logging.info(f"Blocking request to: {request.url}")
         request.abort()  # Block the request
-    if 'svg' in request.url or 'jpg' in request.url:
-        logging.info(f"Blocking request to: {request.url}")
-        request.abort()  # Block the request
+    # if 'svg' in request.url or 'jpg' in request.url:
+    #     logging.info(f"Blocking request to: {request.url}")
+    #     request.abort()  # Block the request
     if 'gravatar.com' in request.url:
         logging.info(f"Blocking request to: {request.url}")
         request.abort()  # Block the request
@@ -129,9 +129,9 @@ def intercept(request):
     if 'content-autofill.googleapis.com' in request.url:
         logging.info(f"Blocking request to: {request.url}")
         request.abort()  # Block the request
-    if '/static/media/' in request.url:
-        logging.info(f"Blocking request to: {request.url}")
-        request.abort()  # Block the request
+    # if '/static/media/' in request.url:
+    #     logging.info(f"Blocking request to: {request.url}")
+    #     request.abort()  # Block the request
 
 def run(proxy):
     setup_logging()
@@ -224,12 +224,12 @@ def run(proxy):
 
         add_cookie_to_local_storage(driver, cookie)
 
-        # Check successful login
-        while not wait_for_element_exists(driver, By.XPATH, "//*[text()='Dashboard']"):
-            logging.info(
-                f"Refreshing in {secUntilRestart} seconds to check login (If stuck, verify your token)..."
-            )
-            driver.get(extension_url)
+        # # Check successful login
+        # while not wait_for_element_exists(driver, By.XPATH, "//*[text()='Dashboard']"):
+        #     logging.info(
+        #         f"Refreshing in {secUntilRestart} seconds to check login (If stuck, verify your token)..."
+        #     )
+        #     driver.get(extension_url)
 
         logging.info("Logged in successfully!")
 
@@ -238,14 +238,14 @@ def run(proxy):
         driver.get(f"chrome-extension://{extension_id}/index.html")
         time.sleep(random.randint(3, 7))
 
-        # Refresh until the "Login" button disappears
-        while wait_for_element_exists(driver, By.XPATH, "//*[text()='Login']"):
-            logging.info("Clicking the extension login button...")
-            login = driver.find_element(By.XPATH, "//*[text()='Login']")
-            login.click()
-            time.sleep(10)
-            # Refresh the page
-            driver.refresh()
+        # # Refresh until the "Login" button disappears
+        # while wait_for_element_exists(driver, By.XPATH, "//*[text()='Login']"):
+        #     logging.info("Clicking the extension login button...")
+        #     login = driver.find_element(By.XPATH, "//*[text()='Login']")
+        #     login.click()
+        #     time.sleep(10)
+        #     # Refresh the page
+        #     driver.refresh()
 
         # Check for the "Activated" element
         check_active_element(driver)
