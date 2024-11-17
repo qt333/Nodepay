@@ -104,6 +104,13 @@ def get_os_info():
         logging.error(f"Could not get OS information: {e}")
         return "Unknown OS"
 
+#NOTE 
+# def interceptor(request):
+#     # Block PNG, JPEG and GIF images
+#     if request.path.endswith(('.png', '.jpg', '.gif')):
+#         request.abort()
+
+
 def intercept(request):
     # print(f"Captured request [intercept]: {request.url}")
     # Check if the URL contains 'googleapis.com' and block those requests
@@ -182,7 +189,7 @@ def run(proxy):
                     "https": proxy,
                     "no_proxy": "localhost,127.0.0.1",  # Disable proxy for localhost
                 },
-                'exclude_host':[
+                'exclude_hosts':[
                     'googleapis.com',
                     'optimizationguide-pa.googleapis.com',
                     'gravatar.com',
