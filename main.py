@@ -5,15 +5,19 @@ import subprocess
 import random
 import time
 import logging
-from selenium import webdriver
+from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+
 def setup_logging():
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+
 
 def connection_status(driver):
     if wait_for_element_exists(driver, By.XPATH, "//*[text()='Connected']"):
@@ -23,215 +27,167 @@ def connection_status(driver):
     else:
         logging.warning("Status: Unknown!")
 
+
 def check_active_element(driver):
     try:
         wait_for_element(driver, By.XPATH, "//*[text()='Activated']")
         driver.find_element(By.XPATH, "//*[text()='Activated']")
         logging.info("Extension is activated!")
     except NoSuchElementException:
-        logging.error("Failed to find 'Activated' element. Extension activation failed.")
+        logging.error(
+            "Failed to find 'Activated' element. Extension activation failed."
+        )
 
-def wait_for_element_exists(driver, by, value, timeout=30):
+
+def wait_for_element_exists(driver, by, value, timeout=10):
     try:
-        WebDriverWait(driver, timeout).until(EC.presence_of_element_located((by, value)))
+        WebDriverWait(driver, timeout).until(
+            EC.presence_of_element_located((by, value))
+        )
         return True
     except TimeoutException:
         return False
 
-def wait_for_element(driver, by, value, timeout=30):
+
+def wait_for_element(driver, by, value, timeout=10):
     try:
-        element = WebDriverWait(driver, timeout).until(EC.presence_of_element_located((by, value)))
+        element = WebDriverWait(driver, timeout).until(
+            EC.presence_of_element_located((by, value))
+        )
         return element
     except TimeoutException as e:
         logging.error(f"Error waiting for element {value}: {e}")
         raise
 
+
 def set_local_storage_item(driver, key, value):
     driver.execute_script(f"localStorage.setItem('{key}', '{value}');")
-    # result = driver.execute_script(f"return localStorage.getItem('{key}');")
-    # return result
+    result = driver.execute_script(f"return localStorage.getItem('{key}');")
+    return result
+
 
 def add_cookie_to_local_storage(driver, cookie_value):
-    keys = ['np_webapp_token', 'np_token']
+    keys = ["np_webapp_token", "np_token"]
     for key in keys:
         result = set_local_storage_item(driver, key, cookie_value)
-        # logging.info(f"Added {key} with value {result[:8]}...{result[-8:]} to local storage.")
+        logging.info(
+            f"Added {key} with value {result[:8]}...{result[-8:]} to local storage."
+        )
     logging.info("!!!!! Your token can be used to login for 7 days !!!!!")
+
 
 def get_chromedriver_version():
     try:
-        result = subprocess.run(['chromedriver', '--version'], capture_output=True, text=True)
+        result = subprocess.run(
+            ["chromedriver", "--version"], capture_output=True, text=True
+        )
         return result.stdout.strip()
     except Exception as e:
         logging.error(f"Could not get ChromeDriver version: {e}")
         return "Unknown version"
 
+
 def get_os_info():
     try:
-        os_info = {
-            'System': platform.system(),
-            'Version': platform.version()
-        }
-        
-        if os_info['System'] == 'Linux':
-            os_info.update({
-                'System': distro.name(pretty=True),
-                'Version': distro.version(pretty=True, best=True)
-            })
+        os_info = {"System": platform.system(), "Version": platform.version()}
+
+        if os_info["System"] == "Linux":
+            os_info.update(
+                {
+                    "System": distro.name(pretty=True),
+                    "Version": distro.version(pretty=True, best=True),
+                }
+            )
         return os_info
     except Exception as e:
         logging.error(f"Could not get OS information: {e}")
         return "Unknown OS"
 
+
 def run(proxy):
     setup_logging()
-    
-    branch = ''
-    version = '1.0.9' + branch
-    secUntilRestart = 30
+
+    branch = ""
+    version = "1.0.9" + branch
+    secUntilRestart = 60
     logging.info(f"Started the script {version}")
 
     try:
-        # os_info = get_os_info()
-        # logging.info(f'OS Info: {os_info}')
-        
+        os_info = get_os_info()
+        logging.info(f"OS Info: {os_info}")
+
         # Read variables from the OS env
-        cookie = os.getenv('NP_COOKIE')
-        extension_id = os.getenv('EXTENSION_ID')
-        extension_url = os.getenv('EXTENSION_URL')
+        cookie = os.getenv("NP_COOKIE")
+        extension_id = os.getenv("EXTENSION_ID")
+        extension_url = os.getenv("EXTENSION_URL")
 
         # Check if credentials are provided
         if not cookie:
-            logging.error('No cookie provided. Please set the NP_COOKIE environment variable.')
+            logging.error(
+                "No cookie provided. Please set the NP_COOKIE environment variable."
+            )
             return  # Exit the script if credentials are not provided
 
-        
-
         chrome_options = Options()
-        chrome_options.add_extension(f'./{extension_id}.crx')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless=new')
-        chrome_options.add_argument('--disable-web-security')
-        chrome_options.add_argument('--allow-file-access-from-files')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0")
-        chrome_options.add_argument(f"--proxy-server={proxy}")
+        chrome_options.add_extension(f"./{extension_id}.crx")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument(
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0"
+        )
+
+        # Use proxy if provided
+        seleniumwire_options = {}
+        if proxy:
+            seleniumwire_options = {
+                "proxy": {
+                    "http": proxy,
+                    "https": proxy,
+                    "no_proxy": "localhost,127.0.0.1",  # Disable proxy for localhost
+                }
+            }
+
         # Initialize the WebDriver
         chromedriver_version = get_chromedriver_version()
-        logging.info(f'Using {chromedriver_version}')
-        driver = webdriver.Chrome(options=chrome_options)
+        logging.info(f"Using {chromedriver_version}")
+        driver = webdriver.Chrome(
+            options=chrome_options, seleniumwire_options=seleniumwire_options
+        )
     except Exception as e:
-        logging.error(f'An error occurred: {e}')
-        logging.error(f'Restarting in 60 seconds...')
+        logging.error(f"An error occurred: {e}")
+        logging.error(f"Restarting in 60 seconds...")
         time.sleep(secUntilRestart)
-        run()
+        run(proxy)
 
     try:
         # NodePass checks for width less than 1024p
-        driver.set_window_size(1024, driver.get_window_size()['height'])
-
-        #add specific cookie for auth
-        def add_cookies_to_driver(driver):
-            cookies = [
-        {
-            "domain": ".nodepay.ai",
-            "expirationDate": 1765143375.493227,
-            "hostOnly": False,
-            "httpOnly": False,
-            "name": "_ga",
-            "path": "/",
-            "sameSite": "unspecified",
-            "secure": False,
-            "session": False,
-            "storeId": "0",
-            "value": "GA1.1.549148054.1730376988"
-        },
-        {
-            "domain": ".nodepay.ai",
-            "expirationDate": 1764937072.190398,
-            "hostOnly": False,
-            "httpOnly": False,
-            "name": "_ga_KYCRH36S70",
-            "path": "/",
-            "sameSite": "unspecified",
-            "secure": False,
-            "session": False,
-            "storeId": "0",
-            "value": "GS1.1.1730376987.1.1.1730377072.0.0.0"
-        },
-        {
-            "domain": ".nodepay.ai",
-            "expirationDate": 1765143375.519672,
-            "hostOnly": False,
-            "httpOnly": False,
-            "name": "_ga_DDBLPW88G4",
-            "path": "/",
-            "sameSite": "unspecified",
-            "secure": False,
-            "session": False,
-            "storeId": "0",
-            "value": "GS1.1.1730582174.7.1.1730583375.0.0.0"
-        },
-        {
-            "domain": ".nodepay.ai",
-            "expirationDate": 1765143375.519672,
-            "hostOnly": False,
-            "httpOnly": False,
-            "name": "__cf_bm",
-            "path": "/",
-            "sameSite": "unspecified",
-            "secure": False,
-            "session": False,
-            "storeId": "0",
-            "value": "q12cylkxIwkoHIwgGb7SOb19I3Fdtegk.OTbJAPxfaA-1730582193-1.0.1.1-aQgyenFteOm8BDN0lrNRRfm8cuT3cYVl4AohVBraDY5TIrU_NofOyeMqWf3hfGLHTUln3rmISnurkw.wLDbqUw"
-        },
-        {
-            "domain": "api.nodepay.org",
-            "expirationDate": 1765143375.519672,
-            "hostOnly": False,
-            "httpOnly": False,
-            "name": "JSESSIONID",
-            "path": "/",
-            "sameSite": "unspecified",
-            "secure": False,
-            "session": False,
-            "storeId": "0",
-            "value": "55BA1B9557A8173B99A319C9145DAFB4"
-        }
-        ]
-            
-            for cookie in cookies:
-                driver.add_cookie(cookie)
-            logging.info(f"Added cookie: {cookie['name']} with value {cookie['value'][:8]}...{cookie['value'][-8:]}")
-            logging.info("!!!!! Your tokens can be used to login for 7 days !!!!!")
+        driver.set_window_size(1024, driver.get_window_size()["height"])
 
         # Navigate to a webpage
-        logging.info(f'Navigating to {extension_url} website...')
+        logging.info(f"Navigating to {extension_url} website...")
         driver.get(extension_url)
-        time.sleep(random.randint(5,8))
-        add_cookies_to_driver(driver)
-        
-        # driver.save_screenshot('screenshot.png')
+        time.sleep(random.randint(3, 7))
 
-        # add_cookie_to_local_storage(driver, cookie)
-
-        
+        add_cookie_to_local_storage(driver, cookie)
 
         # Check successful login
         while not wait_for_element_exists(driver, By.XPATH, "//*[text()='Dashboard']"):
-            logging.info(f'Refreshing in {secUntilRestart} seconds to check login (If stuck, verify your token)...')
+            logging.info(
+                f"Refreshing in {secUntilRestart} seconds to check login (If stuck, verify your token)..."
+            )
             driver.get(extension_url)
 
-        logging.info('Logged in successfully!')
+        logging.info("Logged in successfully!")
 
-        time.sleep(random.randint(10,15))
-        logging.info('Accessing extension settings page...')
-        driver.get(f'chrome-extension://{extension_id}/index.html')
-        time.sleep(random.randint(3,7))
+        time.sleep(random.randint(10, 50))
+        logging.info("Accessing extension settings page...")
+        driver.get(f"chrome-extension://{extension_id}/index.html")
+        time.sleep(random.randint(3, 7))
 
         # Refresh until the "Login" button disappears
         while wait_for_element_exists(driver, By.XPATH, "//*[text()='Login']"):
-            logging.info('Clicking the extension login button...')
+            logging.info("Clicking the extension login button...")
             login = driver.find_element(By.XPATH, "//*[text()='Login']")
             login.click()
             time.sleep(10)
@@ -258,8 +214,8 @@ def run(proxy):
 
         connection_status(driver)
     except Exception as e:
-        logging.error(f'An error occurred: {e}')
-        logging.error(f'Restarting in {secUntilRestart} seconds...')
+        logging.error(f"An error occurred: {e}")
+        logging.error(f"Restarting in {secUntilRestart} seconds...")
         driver.quit()
         time.sleep(secUntilRestart)
         run()
@@ -270,24 +226,25 @@ def run(proxy):
             driver.refresh()
             connection_status(driver)
         except KeyboardInterrupt:
-            logging.info('Stopping the script...')
+            logging.info("Stopping the script...")
             driver.quit()
             break
 
 
-with open('free-proxy.txt', 'r') as file:
+with open("proxies.txt", "r") as file:
     proxy_list = [proxy.strip() for proxy in file.readlines()]
     # print(proxy_list)
 
+
 def define_proxy(proxy):
-    host, port, username, password = proxy.split(':')
-    proxy_url = f'socks5://{username}:{password}@{host}:{port}'
-    return proxy_url
+    host, port, username, password = proxy.split(":")
+    proxy_url = f"http://{username}:{password}@{host}:{port}"
+    return proxy
+
 
 proxies = [define_proxy(proxy) for proxy in proxy_list]
 
 from concurrent.futures import ThreadPoolExecutor
-# run()
 
 with ThreadPoolExecutor(max_workers=len(proxies)) as pool:
-    pool.map(run, proxies)    
+    pool.map(run, proxies)

@@ -33,12 +33,12 @@ RUN git clone "https://github.com/${GIT_USERNAME}/${GIT_REPO}.git" && \
 RUN ./${GIT_REPO}/bin/crxdl $EXTENSION_ID
 
 # Install Python packages
-RUN pip3 install distro
+RUN pip3 install distro selenium-wire
 
 # Copy the Python script
 COPY main.py .
 # Copy the Python script
-COPY free-proxy.txt .
+COPY proxies.txt .
 
 # Run the Python script
 ENTRYPOINT [ "python3", "main.py" ]
