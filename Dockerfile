@@ -36,9 +36,9 @@ RUN ./${GIT_REPO}/bin/crxdl $EXTENSION_ID
 # Install Python packages
 RUN pip3 install distro && pip3 install selenium-wire && pip3 install blinker==1.7.0
 
-# # Copy the Python script
+# Copy the Python script
 # COPY main.py .
-# # Copy the Python script
+# Copy the Python script
 # COPY proxies.txt .
 
 # Run the Python script

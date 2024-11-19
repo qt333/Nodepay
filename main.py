@@ -5,6 +5,7 @@ import subprocess
 import random
 import time
 import logging
+import random
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -12,6 +13,14 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from threading import Lock
+
+
+lock = Lock()
+c = 0 
+
+with open("proxies.txt", "r") as file:
+    proxy_pool_list = [proxy.strip() for proxy in file.readlines()[10:]]
 
 
 def setup_logging():
@@ -19,15 +28,50 @@ def setup_logging():
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
-
-def connection_status(driver):
+def connection_status_check(driver, thread_number):
+    global c
     if wait_for_element_exists(driver, By.XPATH, "//*[text()='Connected']"):
-        logging.info("Status: Connected!")
+        # logging.info(f"Status: Connected! [{c}]")
+        # Get the element and extract the number
+        element = driver.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div[3]/div/div[2]/div[1]/span")
+        text = element.text  # Get "Network Quality: 81%"
+        number = int(''.join([char for char in text if char.isdigit()]))
+        
+        if number > 69:
+            logging.info(f'Thread {thread_number} | Status Check | Network Quality: {number}')
+            return True
+        else:
+            logging.info(f"Thread {thread_number} | Low network quality: {number}. Change proxy...")
+            return None
     elif wait_for_element_exists(driver, By.XPATH, "//*[text()='Disconnected']"):
-        logging.warning("Status: Disconnected!")
+        logging.warning("Status: Disconnected! Change proxy...")
+        return None
     else:
         logging.warning("Status: Unknown!")
+        return None
 
+def connection_status(driver, thread_number):
+    global c
+    if wait_for_element_exists(driver, By.XPATH, "//*[text()='Connected']"):
+        # logging.info(f"Status: Connected! [{c}]")
+        # Get the element and extract the number
+        element = driver.find_element(By.XPATH, "//*[@id='root']/div/div[2]/div[3]/div/div[2]/div[1]/span")
+        text = element.text  # Get "Network Quality: 81%"
+        number = int(''.join([char for char in text if char.isdigit()]))
+        
+        if number > 69:
+            c += 1
+            logging.info(f'Thread {thread_number} | Status: Connected! [{c}] | Network Quality: {number}')
+            return True
+        else:
+            logging.info(f"Thread {thread_number} | Low network quality: {number}. Change proxy...")
+            return None
+    elif wait_for_element_exists(driver, By.XPATH, "//*[text()='Disconnected']"):
+        logging.warning("Status: Disconnected! Change proxy...")
+        return None
+    else:
+        logging.warning("Status: Unknown!")
+        return None
 
 def check_active_element(driver):
     try:
@@ -40,7 +84,7 @@ def check_active_element(driver):
         )
 
 
-def wait_for_element_exists(driver, by, value, timeout=30):
+def wait_for_element_exists(driver, by, value, timeout=60):
     try:
         WebDriverWait(driver, timeout).until(
             EC.presence_of_element_located((by, value))
@@ -50,7 +94,7 @@ def wait_for_element_exists(driver, by, value, timeout=30):
         return False
 
 
-def wait_for_element(driver, by, value, timeout=10):
+def wait_for_element(driver, by, value, timeout=15):
     try:
         element = WebDriverWait(driver, timeout).until(
             EC.presence_of_element_located((by, value))
@@ -58,7 +102,8 @@ def wait_for_element(driver, by, value, timeout=10):
         return element
     except TimeoutException as e:
         logging.error(f"Error waiting for element {value}: {e}")
-        raise
+        # raise
+        pass
 
 
 def set_local_storage_item(driver, key, value):
@@ -114,6 +159,8 @@ def get_os_info():
 def intercept(request):
     # print(f"Captured request [intercept]: {request.url}")
     # Check if the URL contains 'googleapis.com' and block those requests
+    if request.path.endswith(('.png', '.jpg', '.gif', '.svg')):
+        request.abort()
     if 'googleapis.com' in request.url or 'update.googleapis.com' in request.url:
         logging.info(f"Blocking request to: {request.url}")
         request.abort()  # Abort the request
@@ -121,9 +168,9 @@ def intercept(request):
     if 'optimizationguide-pa.googleapis.com' in request.url:
         logging.info(f"Blocking request to: {request.url}")
         request.abort()  # Block the request
-    # if 'svg' in request.url or 'jpg' in request.url:
-    #     logging.info(f"Blocking request to: {request.url}")
-    #     request.abort()  # Block the request
+    if ('svg' in request.url or 'jpg' in request.url) and 'nodepay' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
     if 'gravatar.com' in request.url:
         logging.info(f"Blocking request to: {request.url}")
         request.abort()  # Block the request
@@ -136,12 +183,18 @@ def intercept(request):
     if 'content-autofill.googleapis.com' in request.url:
         logging.info(f"Blocking request to: {request.url}")
         request.abort()  # Block the request
-    # if '/static/media/' in request.url:
-    #     logging.info(f"Blocking request to: {request.url}")
-    #     request.abort()  # Block the request
+    if 'edgedl.me.gvt1.com' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
+    if '/static/media/' in request.url:
+        logging.info(f"Blocking request to: {request.url}")
+        request.abort()  # Block the request
 
-def run(proxy):
+def run(proxy_data):
+    global c
     setup_logging()
+
+    thread_number, proxy = proxy_data
 
     branch = ""
     version = "1.0.9" + branch
@@ -196,28 +249,45 @@ def run(proxy):
                     'googletagmanager.com',
                     'google-analytics.com',
                     'update.googleapis.com',
-                    'content-autofill.googleapis.com'
+                    'content-autofill.googleapis.com',
+                    'www.googletagmanager.com',
+                    'accounts.google.com',
+                    'edgedl.me.gvt1.com',
+                    'www.googleapis.com',
+                    'www.optimizationguide-pa.googleapis.com',
+                    'www.gravatar.com',
+                    'www.googletagmanager.com',
+                    'www.google-analytics.com',
+                    'www.update.googleapis.com',
+                    'www.content-autofill.googleapis.com',
                     ]
                 }
 
         # Initialize the WebDriver
         # chromedriver_version = get_chromedriver_version()
         # logging.info(f"Using {chromedriver_version}")
-
-        if service:
-            driver = webdriver.Chrome(service=service,
-            options=chrome_options, seleniumwire_options=seleniumwire_options
-        )
-        else:
-            driver = webdriver.Chrome(
-            options=chrome_options, seleniumwire_options=seleniumwire_options
-        )
+        with lock:
+            if service:
+                driver = webdriver.Chrome(service=service,
+                options=chrome_options, seleniumwire_options=seleniumwire_options
+            )
+            else:
+                driver = webdriver.Chrome(
+                options=chrome_options, seleniumwire_options=seleniumwire_options
+            )
         
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
+        logging.error(f"Thread {thread_number} | An error occurred: {e}")
         logging.error(f"Restarting in 60 seconds...")
+        driver.quit()
         time.sleep(secUntilRestart)
-        run(proxy)
+        run((thread_number, random.choice(proxy_pool_list)))
+        # c -= 1
+        # logging.error(f"An error occurred: {e}")
+        # logging.error(f"Restarting in {secUntilRestart} seconds...")
+        # logging.error(f"Close Connection.")
+        # driver.quit()
+        return
 
     try:
         driver.request_interceptor = intercept
@@ -226,36 +296,44 @@ def run(proxy):
 
         # Navigate to a webpage
         logging.info(f"Navigating to {extension_url} website...")
-        driver.get(extension_url)
-        time.sleep(random.randint(3, 7))
-
-        add_cookie_to_local_storage(driver, cookie)
+        with lock:
+            driver.get(extension_url)
+        time.sleep(random.randint(7, 12))
+        with lock:
+            add_cookie_to_local_storage(driver, cookie)
+        time.sleep(random.randint(2, 6))
 
         # # Check successful login
         # while not wait_for_element_exists(driver, By.XPATH, "//*[text()='Dashboard']"):
         #     logging.info(
         #         f"Refreshing in {secUntilRestart} seconds to check login (If stuck, verify your token)..."
         #     )
-        #     driver.get(extension_url)
+        #     with lock:
+        #         driver.get(extension_url)
 
-        logging.info("Logged in successfully!")
+        # logging.info("Logged in successfully!")
 
-        time.sleep(random.randint(6, 15))
-        logging.info("Accessing extension settings page...")
-        driver.get(f"chrome-extension://{extension_id}/index.html")
         time.sleep(random.randint(3, 7))
-
-        # # Refresh until the "Login" button disappears
+        logging.info("Accessing extension settings page...")
+        with lock:
+            driver.get(f"chrome-extension://{extension_id}/index.html")
+        time.sleep(random.randint(12, 17))
+        with lock:
+            driver.refresh()
+        time.sleep(random.randint(12, 17))
+        # Refresh until the "Login" button disappears
+        
         # while wait_for_element_exists(driver, By.XPATH, "//*[text()='Login']"):
         #     logging.info("Clicking the extension login button...")
         #     login = driver.find_element(By.XPATH, "//*[text()='Login']")
-        #     login.click()
+        #     with lock:
+        #         login.click()
         #     time.sleep(10)
-        #     # Refresh the page
-        #     driver.refresh()
+            # Refresh the page
+            # driver.refresh()
 
         # Check for the "Activated" element
-        check_active_element(driver)
+        # check_active_element(driver)
 
         # Get handles for all windows
         all_windows = driver.window_handles
@@ -264,27 +342,48 @@ def run(proxy):
         active_window = driver.current_window_handle
 
         # Close all windows except the active one
-        for window in all_windows:
-            if window != active_window:
-                driver.switch_to.window(window)
-                driver.close()
+        with lock:
+            for window in all_windows:
+                if window != active_window:
+                    driver.switch_to.window(window)
+                    driver.close()
 
-        # Switch back to the active window
-        driver.switch_to.window(active_window)
+            # Switch back to the active window
+            driver.switch_to.window(active_window)
 
-        connection_status(driver)
+            if connection_status(driver, thread_number) == None:
+                raise
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
+        logging.error(f"Thread {thread_number} | An error occurred: {e}")
         logging.error(f"Restarting in {secUntilRestart} seconds...")
+        # logging.error(f"Close Connection.")
         driver.quit()
         time.sleep(secUntilRestart)
-        run()
+        run((thread_number, random.choice(proxy_pool_list)))
+        return
 
     while True:
         try:
-            time.sleep(86400)
-            driver.refresh()
-            connection_status(driver)
+            logging.info(f'Connected proxies: {c}')
+            time.sleep(3600)
+            with lock:
+                driver.refresh()
+                if connection_status_check(driver, thread_number) == None:
+                    driver.quit()
+                    run(random.choice(proxy_pool_list))
+                    break
+            # while connection_status(driver) == None:
+            #     logging.info("Attemt to reconnect...")
+            #     c += 1
+            #     driver.refresh()
+            #     time.sleep(60)
+            #     if connection_status(driver):
+            #         break
+            #     if c > 5:
+            #         logging.info("Stopping the script due atempts failure...")
+            #         driver.quit()
+            #         return
+                
         except KeyboardInterrupt:
             logging.info("Stopping the script...")
             driver.quit()
@@ -292,7 +391,7 @@ def run(proxy):
 
 
 with open("proxies.txt", "r") as file:
-    proxy_list = [proxy.strip() for proxy in file.readlines()]
+    proxy_list = [(i, proxy.strip()) for i, proxy in enumerate(file.readlines()[:10])]
     # print(proxy_list)
 
 
